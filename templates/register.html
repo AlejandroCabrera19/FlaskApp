@@ -1,0 +1,38 @@
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database</title>
+</head>
+<body>
+    
+    <h1>Register Customer</h1>
+    <form method="POST" action="">
+        {{ form.hidden_tag()}}
+        {{form.username.label}}
+        {{form.username}}
+        <br>
+        {{form.first_name.label}}
+        {{form.first_name}}
+        <br>
+        {{form.last_name.label}}
+        {{form.last_name}}
+        <br>
+        {{form.email.label}}
+        {{form.email}}
+        <br>
+        {{form.dob.label}}
+        {{form.dob}}
+        <br>
+        {{form.submit}}
+        {% with messages = get_flashed_messages() %}  
+         {% if messages %}  
+               {% for message in messages %}  
+                    <p>{{ message }}</p>  
+               {% endfor %}  
+         {% endif %}  
+      {% endwith %}  
+    </form>
+</body>
+</html>
+{% endblock content %}
