@@ -1,40 +1,33 @@
-from os import error
 import customers
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, render_template, request
 from app import db
-from forms import RegistrationForm
 from customers.models import Customer
+from sqlalchemy import exc
 views = Blueprint('views',__name__,template_folder='templates')
 
 @views.route('/', methods=['GET','POST'])
 def index():
-    form = RegistrationForm()
-    if request.method == 'POST':#This makes it so the route detects if there was a post method used
-        error = 'Error: You have not entered your: ' 
-        if Customer.query.filter_by(username = form.username.data).first() is not None:
-            flash('Customer '+form.username.data+' already created!') #This is to let the customer know if they already have an account
-            return render_template('register.html', title = 'Register', form = form)
-        else: #These Ifs are to test if the fields are empty
-            if form.username.data == "":
-                error = error + "Username," 
-            if form.first_name.data == "":
-                error = error + "First Name,"
-            if form.last_name.data == "":
-                error = error + "Last Name,"
-            if form.email.data == "":
-                error = error + "Email,"
-            if form.dob.data == "":
-                error = error + "Date of Birth"
-            if error != 'Error: You have not entered your: ':
-                #Flashes the number of fields left blank
-                flash(error)
-            
-        if error == 'Error: You have not entered your: ':
-            #block of code that executes if there are no errors
-            newCustomer = Customer(username = form.username.data,first_name = form.first_name.data,last_name = form.last_name.data,email = form.email.data,dob = form.dob.data)
-            db.session.add(newCustomer)
-            db.session.commit()
-            flash(f'Customer created with Username: {form.username.data}, First Name: {form.first_name.data}, Last Name: {form.last_name.data}, Email: {form.email.data}, Date of Birth: {form.dob.data}')
-    return render_template('register.html', title = 'Register', form = form)
-#newCust = Customer(username = userName,first_name = firstName,last_name = lastName,email = email,dob = dob)
+    return render_template('register.html', title = 'Register')
+
+@views.route('/json-post',methods =['POST'])
+def json_post():
+    try:
+        #The block of code that is supposed to execute if a new customer is to be placed in the database
+        request_data = request.get_json()
+        userName = request_data['username']
+        firstName = request_data['first_name']
+        lastName = request_data['last_name']
+        email = request_data['email']
+        dob = request_data['dob']
+        newCustomer = Customer(username = userName,first_name = firstName,last_name = lastName,email = email,dob = dob)
+        db.session.add(newCustomer)
+        db.session.commit()
+        return f'Customer entered with Username: {userName}, First Name: {firstName}, Last Name: {lastName}, E-mail: {email}, Date of Birth: {dob}'
+    except exc.IntegrityError:
+        #Error Code 409, for resource already exists / duplicate resource / Conflict
+        #Error that occurs when a customer already has a place in the database
+        return {"Message":"Error 409, Customer already exists"}
+    except KeyError:
+        #Error that occurs when a user leaves fields empty
+        return {"Message":"Error 409, left required fields empty"}
     
