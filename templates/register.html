@@ -2,29 +2,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Database</title>
+    <title>Customer Registration</title>
 </head>
-<body>
-    
-    <h1>Register Customer</h1>
-    <form method="POST" action="">
-        {{ form.hidden_tag()}}
-        {{form.username.label}}
-        {{form.username}}
-        <br>
-        {{form.first_name.label}}
-        {{form.first_name}}
-        <br>
-        {{form.last_name.label}}
-        {{form.last_name}}
-        <br>
-        {{form.email.label}}
-        {{form.email}}
-        <br>
-        {{form.dob.label}}
-        {{form.dob}}
-        <br>
-        {{form.submit}}
+<body>  
+    <h1>Welcome to the currently useless Registration page</h1>
         {% with messages = get_flashed_messages() %}  
          {% if messages %}  
                {% for message in messages %}  
