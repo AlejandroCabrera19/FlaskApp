@@ -3,7 +3,7 @@ from flask import Blueprint, flash, render_template, request
 from app import db
 from customers.models import Customer
 from sqlalchemy import exc
-from json import json
+import json
 
 views = Blueprint("views", __name__, template_folder="templates")
 
