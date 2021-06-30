@@ -14,6 +14,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
 # HINT: sqlite:///db.sqlite3
 db = SQLAlchemy(app)
 from customers.models import Customer
-from views import views
+from customers.views import views
 
-app.register_blueprint(views)
+app.register_blueprint(views, url_prefix="/customers")
