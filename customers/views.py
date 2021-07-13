@@ -5,7 +5,9 @@ from customers.models import Customer
 from sqlalchemy import exc
 import json
 
-views = Blueprint("views", __name__, template_folder="templates")
+views = Blueprint(
+    "views", __name__, template_folder="templates", url_prefix="/customers"
+)
 
 
 @views.route("/", methods=["POST"])
@@ -35,24 +37,28 @@ def create():
             "email": f"{email}",
             "dob": f"{dob}",
             "date_created": f"{newCustomer.date_created}",
-        }
+        }, 200
     except exc.IntegrityError:
         # Error Code 409, for resource already exists / duplicate resource / Conflict
         # Error that occurs when a customer already has a place in the database
-        return {"Message": "ERROR, Code: 409, Customer already exists"}
+        # Should occur when a customer enters a unique field such as email and username more than once
+        return {"Message": "ERROR, Code: 409, Customer already exists"}, 409
     except KeyError:
         # Error that occurs when a user leaves fields empty
-        return {"Message": "ERROR, Code: 422, left required fields empty"}
+        return {"Message": "ERROR, Code: 422, left required fields empty"}, 422
 
 
-def retrieve(customer_id=-1):
+@views.route("/list", defaults={"customer_id": None}, methods=["GET"])
+@views.route("/detail/", defaults={"customer_id": None}, methods=["GET"])
+@views.route("/detail/<int:customer_id>", methods=["GET"])
+def retrieve(customer_id):
     try:
-        if customer_id == -1:
+        if customer_id is None:
             customer_list = {}
             for i in range(1, Customer.query.count() + 1):
                 selected_customer = Customer.query.filter_by(id=i).first()
                 customer_list.update({f"Customer {i}": f"{selected_customer.username}"})
-            return json.dumps(customer_list)
+            return json.dumps(customer_list), 200
         else:
             selected_customer = Customer.query.filter_by(id=customer_id).first()
             returning_data = {
@@ -64,19 +70,9 @@ def retrieve(customer_id=-1):
                 "dob": f"{selected_customer.dob}",
                 "date_created": f"{selected_customer.date_created}",
             }
-            return json.dumps(returning_data)
+            return json.dumps(returning_data), 200
     except Exception:
-        return "ERROR, Code: 404, invalid id number entered"
-
-
-@views.route("/list", methods=["GET"])
-def list():
-    return retrieve()
-
-
-@views.route("/detail/<int:customer_id>", methods=["GET"])
-def detail(customer_id):
-    return retrieve(customer_id)
+        return {"Message": "ERROR, invalid id number entered"}, 404
 
 
 @views.route("/update/<int:customer_id>", methods=["PATCH", "PUT"])
@@ -88,7 +84,7 @@ def update(customer_id):
             if (
                 "username" and "first_name" and "last_name" and "email" and "dob"
             ) not in request_data:
-                return "ERROR! Code: 422, did not fill all required fields"
+                return {"Message": "ERROR, did not fill all required fields"}, 422
             else:
                 updated_customer.username = request_data["username"]
                 updated_customer.first_name = request_data["first_name"]
@@ -104,7 +100,7 @@ def update(customer_id):
                     "email": f"{updated_customer.email}",
                     "dob": f"{updated_customer.dob}",
                     "date_created": f"{updated_customer.date_created}",
-                }
+                }, 200
         elif request.method == "PATCH":
             if "username" in request_data:
                 updated_customer.username = request_data["username"]
@@ -124,9 +120,9 @@ def update(customer_id):
                 "email": f"{updated_customer.email}",
                 "dob": f"{updated_customer.dob}",
                 "date_created": f"{updated_customer.date_created}",
-            }
+            }, 200
     except Exception:
-        return "ERROR, Code: 404, invalid id number entered"
+        return {"Message": "ERROR, invalid id number entered"}, 404
 
 
 @views.route("/delete/<int:customer_id>", methods=["DELETE"])
@@ -135,6 +131,6 @@ def delete(customer_id):
         removed_customer = Customer.query.filter_by(id=customer_id).first()
         db.session.delete(removed_customer)
         db.session.commit()
-        return "Code: 204"
+        return "", 204
     except:
-        return "ERROR, Code: 404"
+        return {"Message": "ERROR, invalid id number entered"}, 404

@@ -16,4 +16,4 @@ db = SQLAlchemy(app)
 from customers.models import Customer
 from customers.views import views
 
-app.register_blueprint(views, url_prefix="/customers")
+app.register_blueprint(views)
