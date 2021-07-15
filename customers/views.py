@@ -48,9 +48,8 @@ def create():
         return {"Message": "ERROR, Code: 422, left required fields empty"}, 422
 
 
-@views.route("/list", defaults={"customer_id": None}, methods=["GET"])
-@views.route("/detail/", defaults={"customer_id": None}, methods=["GET"])
-@views.route("/detail/<int:customer_id>", methods=["GET"])
+@views.route("/", defaults={"customer_id": None}, methods=["GET"])
+@views.route("/<int:customer_id>", methods=["GET"])
 def retrieve(customer_id):
     try:
         if customer_id is None:
@@ -75,32 +74,27 @@ def retrieve(customer_id):
         return {"Message": "ERROR, invalid id number entered"}, 404
 
 
-@views.route("/update/<int:customer_id>", methods=["PATCH", "PUT"])
+@views.route("/<int:customer_id>", methods=["PATCH", "PUT"])
 def update(customer_id):
     try:
         request_data = request.get_json()
         updated_customer = Customer.query.filter_by(id=customer_id).first()
         if request.method == "PUT":
-            if (
-                "username" and "first_name" and "last_name" and "email" and "dob"
-            ) not in request_data:
-                return {"Message": "ERROR, did not fill all required fields"}, 422
-            else:
-                updated_customer.username = request_data["username"]
-                updated_customer.first_name = request_data["first_name"]
-                updated_customer.last_name = request_data["last_name"]
-                updated_customer.email = request_data["email"]
-                updated_customer.dob = request_data["dob"]
-                db.session.commit()
-                return {
-                    "id": f"{updated_customer.id}",
-                    "username": f"{updated_customer.username}",
-                    "first_name": f"{updated_customer.first_name}",
-                    "last_name": f"{updated_customer.last_name}",
-                    "email": f"{updated_customer.email}",
-                    "dob": f"{updated_customer.dob}",
-                    "date_created": f"{updated_customer.date_created}",
-                }, 200
+            updated_customer.username = request_data["username"]
+            updated_customer.first_name = request_data["first_name"]
+            updated_customer.last_name = request_data["last_name"]
+            updated_customer.email = request_data["email"]
+            updated_customer.dob = request_data["dob"]
+            db.session.commit()
+            return {
+                "id": f"{updated_customer.id}",
+                "username": f"{updated_customer.username}",
+                "first_name": f"{updated_customer.first_name}",
+                "last_name": f"{updated_customer.last_name}",
+                "email": f"{updated_customer.email}",
+                "dob": f"{updated_customer.dob}",
+                "date_created": f"{updated_customer.date_created}",
+            }, 200
         elif request.method == "PATCH":
             if "username" in request_data:
                 updated_customer.username = request_data["username"]
@@ -121,11 +115,13 @@ def update(customer_id):
                 "dob": f"{updated_customer.dob}",
                 "date_created": f"{updated_customer.date_created}",
             }, 200
+    except KeyError:
+        return {"Message": "ERROR, did not fill all required fields"}, 422
     except Exception:
         return {"Message": "ERROR, invalid id number entered"}, 404
 
 
-@views.route("/delete/<int:customer_id>", methods=["DELETE"])
+@views.route("/<int:customer_id>", methods=["DELETE"])
 def delete(customer_id):
     try:
         removed_customer = Customer.query.filter_by(id=customer_id).first()
