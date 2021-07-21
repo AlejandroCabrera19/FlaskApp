@@ -53,19 +53,19 @@ def create():
 def retrieve(customer_id):
     try:
         if customer_id is None:
-            customer_list = {}
-            for i in range(1, Customer.query.count() + 1):
-                selected_customer = Customer.query.filter_by(id=i).first()
-                cust_object = {
-                    "id": f"{selected_customer.id}",
-                    "username": f"{selected_customer.username}",
-                    "first_name": f"{selected_customer.first_name}",
-                    "last_name": f"{selected_customer.last_name}",
-                    "email": f"{selected_customer.email}",
-                    "dob": f"{selected_customer.dob}",
-                    "date_created": f"{selected_customer.date_created}",
-                }
-                customer_list.update({f"Customer {i}": f"{cust_object}"})
+            customer_list = []
+            for selected_customer in Customer.query.all():
+                customer_list.append(
+                    {
+                        "id": f"{selected_customer.id}",
+                        "username": f"{selected_customer.username}",
+                        "first_name": f"{selected_customer.first_name}",
+                        "last_name": f"{selected_customer.last_name}",
+                        "email": f"{selected_customer.email}",
+                        "dob": f"{selected_customer.dob}",
+                        "date_created": f"{selected_customer.date_created}",
+                    }
+                )
             return json.dumps(customer_list), 200
         else:
             selected_customer = Customer.query.filter_by(id=customer_id).first()
@@ -79,7 +79,8 @@ def retrieve(customer_id):
                 "date_created": f"{selected_customer.date_created}",
             }
             return json.dumps(returning_data), 200
-    except Exception:
+    except Exception as e:
+        print(e)
         return {"Message": "ERROR, invalid id number entered"}, 404
 
 
