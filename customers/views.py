@@ -5,9 +5,7 @@ from customers.models import Customer
 from sqlalchemy import exc
 import json
 
-views = Blueprint(
-    "views", __name__, template_folder="templates", url_prefix="/customers"
-)
+views = Blueprint("views", __name__, url_prefix="/customers")
 
 
 @views.route("/", methods=["POST"])
