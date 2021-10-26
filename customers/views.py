@@ -14,20 +14,15 @@ def create():
     try:
         # The block of code that is supposed to execute if a new customer is to be placed in the database
         request_data = request.get_json()
-        userName = request_data["username"]
-        firstName = request_data["first_name"]
-        lastName = request_data["last_name"]
-        email = request_data["email"]
-        dob = request_data["dob"]
         newCustomer = Customer(
-            username=userName,
-            first_name=firstName,
-            last_name=lastName,
-            email=email,
-            dob=dob,
+            username=request_data["username"],
+            first_name=request_data["first_name"],
+            last_name=request_data["last_name"],
+            email=request_data["email"],
+            dob=request_data["dob"],
         )
         newCustomer.save()
-        return (customerSchema.jsonify(newCustomer)), 200
+        return json.dumps(newCustomer.to_dict()), 200
     except exc.IntegrityError:
         # Error Code 409, for resource already exists / duplicate resource / Conflict
         # Error that occurs when a customer already has a place in the database
@@ -67,7 +62,7 @@ def update(customer_id):
             updated_customer.email = request_data["email"]
             updated_customer.dob = request_data["dob"]
             updated_customer.save()
-            return (customerSchema.jsonify(updated_customer)), 200
+            return json.dumps(updated_customer.to_dict()), 200
         elif request.method == "PATCH":
             if "username" in request_data:
                 updated_customer.username = request_data["username"]
@@ -80,7 +75,7 @@ def update(customer_id):
             if "dob" in request_data:
                 updated_customer.dob = request_data["dob"]
             updated_customer.save()
-            return (customerSchema.jsonify(updated_customer)), 200
+            return json.dumps(updated_customer.to_dict()), 200
     except KeyError:
         return {"Message": "ERROR, did not fill all required fields"}, 422
     except Exception:
@@ -89,9 +84,9 @@ def update(customer_id):
 
 @views.route("/<int:customer_id>", methods=["DELETE"])
 def delete(customer_id):
-    try:
-        removed_customer = Customer.query.filter_by(id=customer_id).first()
-        removed_customer.delete()
-        return "", 204
-    except:
-        return {"Message": "ERROR, invalid id number entered"}, 404
+    # try:
+    removed_customer = Customer.query.filter_by(id=customer_id).first()
+    removed_customer.delete()
+    return "", 204
+    # except:
+    #   return {"Message": "ERROR, invalid id number entered"}, 404
